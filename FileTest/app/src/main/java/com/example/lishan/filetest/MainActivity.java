@@ -36,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private FTPClient mFTPClient;
     private ExecutorService mThreadPool;
 
-    private String mFTPHost = "192.168.1.100";
+    //private String mFTPHost = "192.168.1.100";
+    private String mFTPHost = "10.0.2.2";
     private int mFTPPort = 21 ;
     private String mFTPUser = "aa";
     private String mFTPPassword  = "aa";
