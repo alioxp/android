@@ -14,6 +14,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import android.util.Log;
 
+import com.wilko.TTFTP.TTFTPProcess;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -51,7 +53,41 @@ public class MainActivity extends AppCompatActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+        //sendCardTest();
+        getfile();
 
+        int id = item.getItemId();
+        Log.i("ccc", "Haha , this is a INFO of MyAndroid. ");
+        //noinspection SimplifiableIfStatement
+       // if (id == R.id.action_settings) {
+       //     return true;
+       // }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    public boolean getfile()
+    {
+        Thread thread=new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                try {
+                    //TFTPSession.TFTP_PORT = 30000;
+                    TTFTPProcess t = new TTFTPProcess();
+                    t.tftpGet("224.0.1.88","aaa.txt",openFileOutput("1.txt", MODE_PRIVATE)); //new FileOutputStream(file););
+                }
+                catch(Exception e){//已经读完文档
+                    Log.i("abcerr",e.getMessage());
+                }
+            }
+        });
+        thread.start();
+        return true;
+    }
+    public boolean sendCardTest()
+    {
         Thread thread=new Thread(new Runnable()
         {
             @Override
@@ -59,17 +95,17 @@ public class MainActivity extends AppCompatActivity {
             {
                 try {
                     Log.i("aaa1", "Haha , this is a INFO of MyAndroid. ");
-         //           byte[] buff = "QQ".getBytes("utf-8");//设定报文信息
+                    //           byte[] buff = "QQ".getBytes("utf-8");//设定报文信息
                     Log.i("aaa2", "Haha , this is a INFO of MyAndroid. ");
-         //           DatagramSocket socket=new DatagramSocket();//建立套接字，参数端口号不填写，系统会自动分配一个可用端口
+                    //           DatagramSocket socket=new DatagramSocket();//建立套接字，参数端口号不填写，系统会自动分配一个可用端口
 //创建报文，包括报文内容，内容长度，报文地址（这里全1地址即为广播），端口号（接受者需要使用该端口）
                     Log.i("aaa3", "Haha , this is a INFO of MyAndroid. ");
-          //          DatagramPacket packet=new DatagramPacket(buff,buff.length,InetAddress.getByName("255.255.255.255"), 30000);
+                    //          DatagramPacket packet=new DatagramPacket(buff,buff.length,InetAddress.getByName("255.255.255.255"), 30000);
                     Log.i("aaa4", "Haha , this is a INFO of MyAndroid. ");
-          //          socket.send(packet);//发送报文
+                    //          socket.send(packet);//发送报文
                     Log.i("aaa5", "Haha , this is a INFO of MyAndroid. ");
-         //          socket.disconnect();//断开套接字
-          //          socket.close();//关闭套接字
+                    //          socket.disconnect();//断开套接字
+                    //          socket.close();//关闭套接字
                     Log.i("abc", "Haha , this is a INFO of MyAndroid. ");
 
                     MulticastSocket mSocket = new MulticastSocket(30000);//生成套接字并绑定30001端口
@@ -90,13 +126,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         thread.start();
-        int id = item.getItemId();
-        Log.i("ccc", "Haha , this is a INFO of MyAndroid. ");
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 }
