@@ -1,6 +1,7 @@
 package com.example.lishan.myapplication;
 
 import android.os.Bundle;
+import android.os.Debug;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -11,10 +12,16 @@ import android.view.MenuItem;
 import java.net.MulticastSocket;
 import java.net.InetAddress;
 import java.net.DatagramPacket;
+import java.io.File;
 import java.net.DatagramSocket;
 import android.util.Log;
-
 import com.wilko.TTFTP.TTFTPProcess;
+import config.GlobalConfig;
+import android.content.Intent;
+import android.widget.Toast;
+import android.app.Activity;
+import android.os.Environment;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -54,14 +61,14 @@ public class MainActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         //sendCardTest();
-        getfile();
-
         int id = item.getItemId();
         Log.i("ccc", "Haha , this is a INFO of MyAndroid. ");
         //noinspection SimplifiableIfStatement
-       // if (id == R.id.action_settings) {
-       //     return true;
-       // }
+        if (id == R.id.action_settings) {
+            //getfile();
+            putfile();
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -70,16 +77,88 @@ public class MainActivity extends AppCompatActivity {
     {
         Thread thread=new Thread(new Runnable()
         {
-            @Override
+             @Override
             public void run()
             {
                 try {
-                    //TFTPSession.TFTP_PORT = 30000;
                     TTFTPProcess t = new TTFTPProcess();
-                    t.tftpGet("224.0.1.88","aaa.txt",openFileOutput("1.txt", MODE_PRIVATE)); //new FileOutputStream(file););
+                    if(GlobalConfig.USE_BROADCAST_UDP)
+                        t.tftpGet(GlobalConfig.BROADCAST_UDP_IP,"aaa.txt",openFileOutput("aaa.txt", MODE_PRIVATE)); //new FileOutputStream(file);); openFileOutput("1.txt", MODE_PRIVATE)
+                    else
+                        t.tftpGet(GlobalConfig.NORMAL_UDP_IP,"aaa.txt", openFileOutput("aaa.txt", MODE_PRIVATE)); //new FileOutputStream(file););
                 }
                 catch(Exception e){//已经读完文档
-                    Log.i("abcerr",e.getMessage());
+                    Log.i("getfile",e.getMessage());
+                }
+            }
+        });
+        thread.start();
+        return true;
+    }
+    Intent intent;
+    /** 调用文件选择软件来选择文件 **/
+    private void showFileChooser() {
+        intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        try {
+            //startActivityForResult(Intent.createChooser(intent, "请选择一个要上传的文件"), FILE_SELECT_CODE);
+        } catch (android.content.ActivityNotFoundException ex) {
+            // Potentially direct the user to the Market with a Dialog
+           // Toast.makeText(getActivity(), "请安装文件管理器", Toast.LENGTH_SHORT).show();
+        }
+    }
+    /** 根据返回选择的文件，来进行上传操作 **/
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // TODO Auto-generated method stub
+        if (resultCode == Activity.RESULT_OK) {
+            // Get the Uri of the selected file
+            /*
+            Uri uri = data.getData();
+            String url;
+            try {
+                url = FFileUtils.getPath(getActivity(), uri);
+                Log.i("ht", "url" + url);
+                String fileName = url.substring(url.lastIndexOf("/") + 1);
+                intent = new Intent(getActivity(), UploadServices.class);
+                intent.putExtra("fileName", fileName);
+                intent.putExtra("url", url);
+                intent.putExtra("type ", "");
+                intent.putExtra("fuid", "");
+                intent.putExtra("type", "");
+
+                getActivity().startService(intent);
+
+            } catch (URISyntaxException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            */
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+    public boolean putfile()
+    {
+        Thread thread=new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                String uploadFile = "aaa.txt";
+                try {
+                    if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+                        File sdCardDir = Environment.getExternalStorageDirectory();//获取SDCard目录
+                        uploadFile = sdCardDir.getPath() + "/" + uploadFile;
+                    }
+                    TTFTPProcess t = new TTFTPProcess();
+                    if(GlobalConfig.USE_BROADCAST_UDP)
+                        t.tftpPut(GlobalConfig.BROADCAST_UDP_IP, uploadFile); //new FileOutputStream(file);); openFileOutput("1.txt", MODE_PRIVATE)
+                    else
+                        t.tftpPut(GlobalConfig.NORMAL_UDP_IP, uploadFile); //new FileOutputStream(file););
+                }
+                catch(Exception e){//已经读完文档
+                    Log.i("putfile",e.getMessage());
                 }
             }
         });
