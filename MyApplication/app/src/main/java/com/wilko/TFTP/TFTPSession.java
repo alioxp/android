@@ -10,6 +10,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.*;
 import java.io.*;
+import config.GlobalConfig;
 
 /** TFTPSession implements the <B>TFTP</B> protocol as defined in RFC1350.
  * Change log:
@@ -41,8 +42,8 @@ public class TFTPSession extends Object {
 
     /** The socket used to communicate with the TFTP Server
      */
-    //private DatagramSocket socket;
-    private MulticastSocket socket;
+    private DatagramSocket socket;
+    //private MulticastSocket socket;
     /** The host we are connecting to
      */
     private String host;
@@ -104,7 +105,7 @@ public class TFTPSession extends Object {
     };
         /** The well known port of the TFTP service
          */
-    public static int TFTP_PORT=30000;//69; modplace
+    //public static int TFTP_PORT=30000;//69; modplace
         /** How long is considered a timeout?
          */
     private static final int TIMEOUT=5000;
@@ -145,11 +146,18 @@ public class TFTPSession extends Object {
         recvbuf = new byte[516];
 
         try {
-            //socket = new DatagramSocket(); modplace
             them=InetAddress.getByName(host);
-            socket = new MulticastSocket(TFTP_PORT);//生成套接字并绑定30001端口
-            socket.joinGroup(them);//加入多播组，发送方和接受方处于同一组时，接收方可抓取多播报文信息
-            socket.setTimeToLive(4);//设定TTL
+
+            if(GlobalConfig.USE_BROADCAST_UDP) {
+                MulticastSocket castsocket = new MulticastSocket(GlobalConfig.UDP_PORT);//生成套接字并绑定30001端口
+                castsocket.joinGroup(them);//加入多播组，发送方和接受方处于同一组时，接收方可抓取多播报文信息
+                castsocket.setTimeToLive(2);//设定TTL
+                socket = castsocket;
+            }
+            else
+            {
+                socket = new DatagramSocket();
+            }
 
             socket.setSoTimeout(TIMEOUT);
             myTID=socket.getLocalPort();
@@ -204,7 +212,7 @@ public class TFTPSession extends Object {
         }
         buf[j]=0;
 
-        lastPacket = new DatagramPacket(buf,buf.length,them,TFTP_PORT);
+        lastPacket = new DatagramPacket(buf,buf.length,them,GlobalConfig.UDP_PORT);
         socket.send(lastPacket);
     }
 
@@ -250,7 +258,7 @@ public class TFTPSession extends Object {
         }
         buf[j]=0;
 
-        lastPacket = new DatagramPacket(buf,buf.length,them,TFTP_PORT);
+        lastPacket = new DatagramPacket(buf,buf.length,them,GlobalConfig.UDP_PORT);
         System.out.println("Sending write request");
         socket.send(lastPacket);
     }

@@ -11,6 +11,7 @@ import java.io.*;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.support.v7.app.AppCompatActivity;
 
 /** This class implements TFTP argument parsing and calls the appropriate TFTP stream
  * class methods to transfer a file via TFTP.
@@ -42,24 +43,40 @@ public class TTFTPProcess extends Object {
 
     /** The well known TFTP port
      */
-    private final static int  TFTPPORT=69;
+    //private final static int  TFTPPORT=69;
     
     /** Creates new TTFTPProcess
      */
     public TTFTPProcess() {
     }
 
+    /* 写外部文件例子
+    if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+
+         File sdCardDir = Environment.getExternalStorageDirectory();//获取SDCard目录
+
+         File saveFile = new File(sdCardDir, “a.txt”);
+
+         FileOutputStream outStream = new FileOutputStream(saveFile);
+
+         outStream.write(“test”.getBytes());
+
+         outStream.close();
+    }
+    */
+
     /** Get a file via TFTP
      * @param host The host to retrieve the file from (domain name or dotted quad IP address)
      * @param file The name of the file to retrieve
      */
+
     public void tftpGet(String host, String file,FileOutputStream f)
     {
         int i=0;
         int j=0;
         try {
             TFTPInputStream r= new TFTPInputStream(host,file);
-            //FileOutputStream f = this.openFileOutput("1.txt", Context.MODE_PRIVATE); //new FileOutputStream(file);
+            //FileOutputStream f = activity.openFileOutput(file, Context.MODE_PRIVATE); //new FileOutputStream(file);
            
             byte buffer[]= new byte[512];
             while((i=r.read(buffer,0,buffer.length ))!=-1)
@@ -94,7 +111,13 @@ public class TTFTPProcess extends Object {
         int i=0;
         int j=0;
         try {
-            TFTPOutputStream w= new TFTPOutputStream(host,file);
+            String strShortName = file;
+            int lastIndex = file.lastIndexOf("/");
+            if(lastIndex >= 0)
+            {
+                strShortName = file.substring(lastIndex + 1);
+            }
+            TFTPOutputStream w= new TFTPOutputStream(host,strShortName);
             FileInputStream f = new FileInputStream(file);      
            
             byte buffer[]= new byte[512];
