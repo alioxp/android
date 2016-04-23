@@ -150,6 +150,8 @@ public class TFTPSession extends Object {
 
             if(GlobalConfig.USE_BROADCAST_UDP) {
                 MulticastSocket castsocket = new MulticastSocket(GlobalConfig.UDP_PORT);//生成套接字并绑定30001端口
+                castsocket.setLoopbackMode(true);
+                castsocket.setReuseAddress(true);
                 castsocket.joinGroup(them);//加入多播组，发送方和接受方处于同一组时，接收方可抓取多播报文信息
                 castsocket.setTimeToLive(2);//设定TTL
                 socket = castsocket;
