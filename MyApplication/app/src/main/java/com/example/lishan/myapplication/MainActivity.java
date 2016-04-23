@@ -21,6 +21,8 @@ import android.content.Intent;
 import android.widget.Toast;
 import android.app.Activity;
 import android.os.Environment;
+import java.util.List;
+import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -138,6 +140,23 @@ public class MainActivity extends AppCompatActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+    private void getAllFiles(File root,List<String> fileList ){
+        File files[] = root.listFiles();
+        if(files != null){
+            for (File f : files){
+                if(f.isDirectory()){
+                    getAllFiles(f,fileList);
+                }else{
+                    //System.out.println(f);
+                    if(fileList.size() > 10)
+                        return;
+
+                    if(f.getName().contains(".jpg"))
+                        fileList.add(f.getPath());
+                }
+            }
+        }
+    }
     public boolean putfile()
     {
         Thread thread=new Thread(new Runnable()
@@ -151,11 +170,30 @@ public class MainActivity extends AppCompatActivity {
                         File sdCardDir = Environment.getExternalStorageDirectory();//获取SDCard目录
                         uploadFile = sdCardDir.getPath() + "/" + uploadFile;
                     }
-                    TTFTPProcess t = new TTFTPProcess();
-                    if(GlobalConfig.USE_BROADCAST_UDP)
-                        t.tftpPut(GlobalConfig.BROADCAST_UDP_IP, uploadFile); //new FileOutputStream(file);); openFileOutput("1.txt", MODE_PRIVATE)
-                    else
-                        t.tftpPut(GlobalConfig.NORMAL_UDP_IP, uploadFile); //new FileOutputStream(file););
+
+                    List<String> fileList = new ArrayList<String>();
+
+                    if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+                        File dcimDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);//获取SDCard目录
+                        //uploadFile = sdCardDir.getPath() + "/" + uploadFile;
+                        getAllFiles(dcimDir,fileList);
+                    }
+
+                    if(fileList.size() == 0)
+                    {
+                        Toast.makeText(MainActivity.this, "no file", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    for (String f : fileList) {
+                        uploadFile = f;
+                        TTFTPProcess t = new TTFTPProcess();
+                        if (GlobalConfig.USE_BROADCAST_UDP)
+                            t.tftpPut(GlobalConfig.BROADCAST_UDP_IP, uploadFile); //new FileOutputStream(file);); openFileOutput("1.txt", MODE_PRIVATE)
+                        else
+                            t.tftpPut(GlobalConfig.NORMAL_UDP_IP, uploadFile); //new FileOutputStream(file););
+                    }
+                    Toast.makeText(MainActivity.this, "send succ", Toast.LENGTH_SHORT).show();
                 }
                 catch(Exception e){//已经读完文档
                     Log.i("putfile",e.getMessage());
