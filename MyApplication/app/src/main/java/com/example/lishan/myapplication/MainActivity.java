@@ -73,6 +73,10 @@ public class MainActivity extends AppCompatActivity {
                     Log.i("abc", "Haha , this is a INFO of MyAndroid. ");
 
                     MulticastSocket mSocket = new MulticastSocket(30000);//生成套接字并绑定30001端口
+
+                    mSocket.setLoopbackMode(true);
+                    mSocket.setReuseAddress(true);
+
                     InetAddress group=InetAddress.getByName("224.0.1.88");//设定多播IP
                     byte[] buff = "QQ".getBytes("utf-8");//设定多播报文的数据
                     mSocket.joinGroup(group);//加入多播组，发送方和接受方处于同一组时，接收方可抓取多播报文信息
@@ -80,8 +84,22 @@ public class MainActivity extends AppCompatActivity {
 //设定UDP报文（内容，内容长度，多播组，端口）
                     DatagramPacket packet = new DatagramPacket(buff,buff.length,group,30000);
                     mSocket.send(packet);//发送报文
-                    mSocket.close();//关闭套接字
 
+                    byte[] buf = new byte[1024];
+                    int i=0;
+
+                    //while (i++ < 3)
+                    {
+                        DatagramPacket datagramPacket = new DatagramPacket(buf, buf.length);
+                        mSocket.receive(datagramPacket); // 接收数据，同样会进入阻塞状态
+
+                        byte[] message = new byte[datagramPacket.getLength()]; // 从buffer中截取收到的数据
+                        System.arraycopy(buf, 0, message, 0, datagramPacket.getLength());
+                        Log.d("rcv:",datagramPacket.getAddress().toString());
+                        Log.d("msg:",new String(message));
+                    }
+
+                    mSocket.close();//关闭套接字
                     setTitle("udp sent");
                 }
                 catch(Exception e){//已经读完文档
