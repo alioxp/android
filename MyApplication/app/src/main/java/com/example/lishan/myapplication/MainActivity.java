@@ -12,6 +12,8 @@ import java.net.MulticastSocket;
 import java.net.InetAddress;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.Date;
+
 import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
@@ -59,48 +61,67 @@ public class MainActivity extends AppCompatActivity {
             {
                 try {
                     Log.i("aaa1", "Haha , this is a INFO of MyAndroid. ");
-         //           byte[] buff = "QQ".getBytes("utf-8");//设定报文信息
-                    Log.i("aaa2", "Haha , this is a INFO of MyAndroid. ");
-         //           DatagramSocket socket=new DatagramSocket();//建立套接字，参数端口号不填写，系统会自动分配一个可用端口
-//创建报文，包括报文内容，内容长度，报文地址（这里全1地址即为广播），端口号（接受者需要使用该端口）
-                    Log.i("aaa3", "Haha , this is a INFO of MyAndroid. ");
-          //          DatagramPacket packet=new DatagramPacket(buff,buff.length,InetAddress.getByName("255.255.255.255"), 30000);
-                    Log.i("aaa4", "Haha , this is a INFO of MyAndroid. ");
-          //          socket.send(packet);//发送报文
-                    Log.i("aaa5", "Haha , this is a INFO of MyAndroid. ");
-         //          socket.disconnect();//断开套接字
-          //          socket.close();//关闭套接字
-                    Log.i("abc", "Haha , this is a INFO of MyAndroid. ");
 
+                    byte[] buff = "QQ".getBytes("utf-8");//设定报文信息
+                    int big_udp_pkg = 1024*8;
+                    byte[] buf = new byte[big_udp_pkg];
+                    DatagramSocket socket=new DatagramSocket();//建立套接字，参数端口号不填写，系统会自动分配一个可用端口
+//创建报文，包括报文内容，内容长度，报文地址（这里全1地址即为广播），端口号（接受者需要使用该端口）
+                    socket.setSendBufferSize(big_udp_pkg);
+                    socket.setReceiveBufferSize(big_udp_pkg);
+
+                    //DatagramPacket packet=new DatagramPacket(buff,buff.length,InetAddress.getByName("255.255.255.255"), 30000);
+                    DatagramPacket packet = new DatagramPacket(buff, buff.length, InetAddress.getByName("192.168.1.5"), 30000);
+                    socket.send(packet);//发送报文
+                    socket.close();//关闭套接字
+                    Log.i("abc", "Haha , this is a INFO of MyAndroid. ");
+                    return;
+/*
                     MulticastSocket mSocket = new MulticastSocket(30000);//生成套接字并绑定30001端口
 
+                    int big_udp_pkg = 1024*8;
                     mSocket.setLoopbackMode(true);
                     mSocket.setReuseAddress(true);
+                    mSocket.setSendBufferSize(big_udp_pkg);
+                    mSocket.setReceiveBufferSize(big_udp_pkg);
 
                     InetAddress group=InetAddress.getByName("224.0.1.88");//设定多播IP
                     byte[] buff = "QQ".getBytes("utf-8");//设定多播报文的数据
                     mSocket.joinGroup(group);//加入多播组，发送方和接受方处于同一组时，接收方可抓取多播报文信息
-                    mSocket.setTimeToLive(4);//设定TTL
+                    mSocket.setTimeToLive(2);//设定TTL
 //设定UDP报文（内容，内容长度，多播组，端口）
-                    DatagramPacket packet = new DatagramPacket(buff,buff.length,group,30000);
-                    mSocket.send(packet);//发送报文
 
-                    byte[] buf = new byte[1024];
-                    int i=0;
+                    byte[] buf = new byte[big_udp_pkg];
+                    Date dtbgn= new Date();
 
-                    //while (i++ < 3)
-                    {
-                        DatagramPacket datagramPacket = new DatagramPacket(buf, buf.length);
-                        mSocket.receive(datagramPacket); // 接收数据，同样会进入阻塞状态
+                    for(int i=0; i<1000;i++) {
 
-                        byte[] message = new byte[datagramPacket.getLength()]; // 从buffer中截取收到的数据
-                        System.arraycopy(buf, 0, message, 0, datagramPacket.getLength());
-                        Log.d("rcv:",datagramPacket.getAddress().toString());
-                        Log.d("msg:",new String(message));
+                        //String strCnt = Integer.toString(i);
+
+                        //System.arraycopy(strCnt.getBytes("GBK"),0,buf,0,strCnt.length());
+                        //buf[strCnt.length()] = 0;
+                        //buf[0] = (byte)(i%100);
+                        DatagramPacket packet = new DatagramPacket(buf, big_udp_pkg, group, 30000);
+                        mSocket.send(packet);//发送报文
+
+                        //while (i++ < 3)
+                        {
+                           // DatagramPacket datagramPacket = new DatagramPacket(buf, buf.length);
+                           // mSocket.receive(datagramPacket); // 接收数据，同样会进入阻塞状态
+
+                            //byte[] message = new byte[datagramPacket.getLength()]; // 从buffer中截取收到的数据
+                           // System.arraycopy(buf, 0, message, 0, datagramPacket.getLength());
+                           // Log.d("rcv:", datagramPacket.getAddress().toString());
+                            //Log.d("msg:", new String(message));
+                        }
                     }
+                    Date dtend= new Date();
+                    Long delta = dtend.getTime() - dtbgn.getTime();
+                    Log.d("delta:", delta.toString());
 
                     mSocket.close();//关闭套接字
-                    setTitle("udp sent");
+*/
+                   // setTitle("udp sent");
                 }
                 catch(Exception e){//已经读完文档
                     Log.i("abcerr",e.getMessage());
