@@ -192,6 +192,8 @@ public class MainActivity extends AppCompatActivity {
                             t.tftpPut(GlobalConfig.BROADCAST_UDP_IP, uploadFile); //new FileOutputStream(file);); openFileOutput("1.txt", MODE_PRIVATE)
                         else
                             t.tftpPut(GlobalConfig.NORMAL_UDP_IP, uploadFile); //new FileOutputStream(file););
+
+                        break;
                     }
                     Toast.makeText(MainActivity.this, "send succ", Toast.LENGTH_SHORT).show();
                 }
